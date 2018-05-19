@@ -21,3 +21,6 @@ target_link_libraries(mymv ${Boost_LIBRARIES})
 
 add_executable(myrm myrm.cpp)
 target_link_libraries(myrm ${Boost_LIBRARIES})
+
+add_executable(mygrep mygrep.cpp)
+target_link_libraries(mygrep ${Boost_LIBRARIES})
