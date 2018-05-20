@@ -11,15 +11,15 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 #include <fstream>
+#include <regex>
 
 using namespace std;
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
 
-bool check_line(string line, string pattern, bool ignore_case, bool invert_match, bool regexp_specified, bool file){
+int check_line(string& line, string& pattern, bool ignore_case, bool invert_match, bool regexp_specified, bool file){
 
-    bool found = false;
 
     if (ignore_case) {
         boost::algorithm::to_lower(line);
@@ -28,44 +28,45 @@ bool check_line(string line, string pattern, bool ignore_case, bool invert_match
     if (!invert_match) {
         if (!regexp_specified){
             if (line.find(pattern) != string::npos){
-                found = true;
-                if (!file) {
+                if (!file)
                     cout << "found: ";
-                }
                 cout << line << endl;
+                return 1;
             }
         } else {
-            boost::regex reg_ex(pattern);
-            boost::smatch results;
-            if (boost::regex_match(line.c_str(), results, reg_ex)){
-                found = true;
-                if (!file) {
-                    cout << "found: ";
-                }
-                cout << line << endl;
-            }
+          regex e (pattern);
+          if (regex_search(line, e)){
+              if (!file)
+                  cout << "found: ";
+              cout << line << endl;
+              return 1;
+          }
         }
     } else {
         if (!regexp_specified){
             if (line.find(pattern) == string::npos){
-                found = true;
-                if (!file) {
+                if (!file)
                     cout << "found: ";
-                }
                 cout << line << endl;
+                return 1;
             }
         } else {
-            cout << "shos z regexp" << endl;
+            regex e (pattern);
+            if (!regex_search(line, e)){
+                if (!file)
+                    cout << "found: ";
+                cout << line << endl;
+                return 1;
+            }
         }
     }
-    return found;
+    return 0;
 }
 
 
 int main(int argc, char** argv) {
 
     // init
-   // bool recursively_mode = false;
     bool invert_match = false;
     bool ignore_case = false;
     bool filename_specified = false;
@@ -82,6 +83,7 @@ int main(int argc, char** argv) {
             ("ignore-case,i", "ignore case distinctions")
             ("file", po::value<std::string>(), "specify a filename")
             ("regexp", po::value<std::string>(), "use pattern for matching");
+
     po::variables_map vm;
 
     if (argc == 1) {
@@ -105,13 +107,11 @@ int main(int argc, char** argv) {
             return EXIT_SUCCESS;
         }
 
-        if (vm.count("invert-match")) {
+        if (vm.count("invert-match"))
             invert_match = true;
-        }
 
-        if (vm.count("ignore-case")) {
+        if (vm.count("ignore-case"))
             ignore_case = true;
-        }
 
         if (vm.count("file")) {
             filename_specified = true;
@@ -148,7 +148,8 @@ int main(int argc, char** argv) {
         }
     }
 
-    bool found = false;
+    int check_occurences = 1;
+    int find_line;
     if (filename_specified) {
         ifstream input(filename);
         if (!input.good()){
@@ -157,17 +158,19 @@ int main(int argc, char** argv) {
         }
         for(string line; getline(input,line);)
         {
-            found = check_line(line, pattern, ignore_case, invert_match, regexp_specified, filename_specified);
+            find_line = check_line(ref(line), ref(pattern), ignore_case, invert_match, regexp_specified, filename_specified);
+            check_occurences += find_line;
         }
 
     } else {
         for (string line; getline(cin, line);) {
-            found = check_line(line, pattern, ignore_case, invert_match, regexp_specified, filename_specified);
+            find_line = check_line(ref(line), ref(pattern), ignore_case, invert_match, regexp_specified, filename_specified);
+            check_occurences += find_line;
         }
     }
 
-    if (!found){
-        cout << "Nothing found :(" << endl;
+    if (check_occurences < 2){
+        cout << "No matches found :(" << endl;
     }
 
     return 0;
