@@ -1,10 +1,6 @@
 #include <stdio.h>
-#include <string.h>
 #include <vector>
 #include <iostream>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <algorithm>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
@@ -12,7 +8,6 @@
 using namespace std;
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
-
 
 int main(int argc, char** argv) {
 
@@ -30,6 +25,7 @@ int main(int argc, char** argv) {
 
 
     try {
+
         auto parsed = po::command_line_parser(argc, argv).options(desc).run();
         paths = po::collect_unrecognized(parsed.options, po::include_positional);
 

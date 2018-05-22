@@ -1,17 +1,14 @@
 #include <iostream>
 #include <vector>
-#include <string>
 #include <fstream>
 #include <sstream>
 #include <cstring>
-#include <fcntl.h>
 #include <unistd.h>
+#include <map>
+
 #define BOOST_NO_CXX11_SCOPED_ENUMS
 #include <boost/filesystem.hpp>
 #undef BOOST_NO_CXX11_SCOPED_ENUMS
-#include <sys/stat.h>
-#include <dirent.h>
-#include <map>
 
 using namespace boost::filesystem;
 using namespace std;

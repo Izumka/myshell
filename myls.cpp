@@ -2,22 +2,15 @@
 #include <unistd.h>
 #include <iostream>
 #include <algorithm>
-#include <vector>
-#include <string>
 #include <sstream>
 #include <iterator>
 #include <string.h>
-#include <stdlib.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
-#include <iterator>
 #include <map>
 #include <fstream>
-#include <time.h>
-#include <dirent.h>
-#define GetCurrentDir getcwd
 
+#define GetCurrentDir getcwd
 
 using namespace std;
 
