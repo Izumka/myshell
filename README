@@ -1,1 +1,19 @@
 # myshell
+Test shell instance which supports:
+
+-myls (same as ls);
+-mycp (... cp);
+-mymkdir (... mkdir);
+-mycat (... cat);
+-mymv (... mv);
+-mygrep (... grep);
+-myrm (... rm);
+-mecho (... echo);
+-mcd (... cd);
+-mexport (... export);
+-mpwd (... pwd);
+-merrno (... errno);
+-mexit (... exit);
+
+
+

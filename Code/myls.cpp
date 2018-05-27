@@ -377,6 +377,7 @@ int main(int argc, char** argv) {
     for (int i = 1; i < argc; ++i) {
         string tmp(argv[i]);
         cstr = tmp.c_str();
+
         com = tmp.substr(0, tmp.find('='));
         if (tmp == "-h" || tmp == "--help") {
             string desc = "\nType a directory path to see all files in it or a single file name to see its name. Use -l to see more info about files, --sort to sort the output. More about ls options in our website: https://cms.ucu.edu.ua/mod/assign/view.php?id=37078 \n";
@@ -441,7 +442,6 @@ int main(int argc, char** argv) {
                 files = var;
             }
             print_sth("\n");
-            print_sth("<" + path + ">\n");
             for(string file: add_sign(files,path)){
                 print_sth(file+"\n");
             }
