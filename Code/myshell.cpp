@@ -13,6 +13,7 @@
 #include <functional>
 #include <map>
 #include <pwd.h>
+#include <vector>
 
 #define GetCurrentDir getcwd
 
@@ -247,7 +248,7 @@ void fork_ex(string command, string line, int &ERRNO)
 
 void executeSriptFile(stringstream &fileName, int &ERRNO)
 {
-    ifstream inFile("../"+fileName.str());
+    ifstream inFile(fileName.str());
 
     if(!inFile)
     {
