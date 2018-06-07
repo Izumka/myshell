@@ -226,9 +226,7 @@ int checkOut(string line) {
     return 0;
 }
 
-void fork_ex_out(string command, string line, int &ERRNO)
-{
-    string old_line = line;
+string change_line(string line){
     vector<string> new_line = split_command(line);
     line="";
     for(int i=0;i<new_line.size()-2;i++){
@@ -237,8 +235,14 @@ void fork_ex_out(string command, string line, int &ERRNO)
         }else{
             line+=new_line[i];
         }
-
     }
+    return line;
+}
+
+void fork_ex_out(string command, string line, int &ERRNO)
+{
+    string old_line = line;
+    line = change_line(line);
 
     vector<string> splited_command = split_command(old_line);
 
@@ -305,6 +309,93 @@ void fork_ex_out(string command, string line, int &ERRNO)
     }
 }
 
+int checkIn(string line) {
+    vector <string> comm = split_command(line);
+    if(comm[comm.size()-2].find("<")!=string::npos && comm[comm.size()-2].size()==1) {
+        return 1;
+    }else if(comm[comm.size()-2].find("<")!=string::npos && comm[comm.size()-2].size()!=1){
+        return 2;
+    }
+    return 0;
+}
+
+bool is_file_exist(const char *fileName)
+{
+    ifstream infile(fileName);
+    return infile.good();
+}
+
+
+
+
+void fork_exIn(string command, string line, int &ERRNO)
+{
+    string old_line = line;
+    line = change_line(line);
+    vector<string> splited_command = split_command(old_line);
+    string file = splited_command[splited_command.size()-1];
+    if (!is_file_exist(file.c_str())){
+        cerr << "File " << file << " doesn't exist" << endl;
+        ERRNO = 1;
+        return;
+    }
+    wordexp_t p;
+    char **w;
+    char *ch = new char[line.length() + 1];
+    strcpy(ch, line.c_str());
+    wordexp(ch, &p, 0);
+    w = p.we_wordv;
+
+    pid_t parent = getpid();
+    pid_t pid = fork();
+
+    if (pid == -1)
+    {
+        cerr << "Bad parameters. Try again" << endl;
+        ERRNO = 1;
+        exit(EXIT_FAILURE);
+    }
+    else if (pid > 0)
+    {
+        int status;
+        waitpid(pid, &status, 0);
+    }
+    else {
+        if(file_exists(command)) {
+            if(checkIn(old_line)==1) {
+                int fd = open(splited_command[splited_command.size()-1].c_str(), O_RDONLY);
+                dup2(fd, 0);
+                close(fd);
+            } else if(checkIn(old_line)==2) {
+                cerr << "Wrong parameters. Usage: command < filename " << endl;
+                ERRNO = 1;
+            }
+            execve(command.c_str(), w, environ);
+        } else {
+            vector<const char *> args;
+            for (int i = 0; i < splited_command.size()-2; i++) {
+                string cur = splited_command[i];
+                args.push_back(cur.c_str());
+            }
+            args.push_back(nullptr);
+            if(checkIn(old_line)==1) {
+                int fd = open(splited_command[splited_command.size()-1].c_str(), O_RDONLY);
+                dup2(fd, 0);
+                close(fd);
+            }else if(checkIn(old_line)==2) {
+                cerr << "Wrong parameters. Usage: command < filename " << endl;
+                ERRNO = 1;
+            }
+            char *const * asd = const_cast<char *const *>(args.data());
+            execvp(command.c_str(), asd);
+        }
+        cout << "Enter the command as the first argument!" << endl;
+        cout << "Use -h | --help to see available commands" << endl;
+
+        ERRNO = 1;
+        exit(EXIT_FAILURE);
+    }
+}
 
 void fork_ex(string command, string line, int &ERRNO)
 {
@@ -481,11 +572,13 @@ int executePipeNext(string line, int from_fd, int to_fd, int &ERRNO) {
 
 
         if (from_fd != -1) {
-            dup2(from_fd,STDIN_FILENO );
+            dup2(STDIN_FILENO ,from_fd);
         }
         if (to_fd != -1) {
-            dup2(to_fd, STDOUT_FILENO );
+            dup2(STDOUT_FILENO , to_fd);
         }
+
+
 
         string command = line.substr(0, line.find(' '));
 
@@ -629,6 +722,9 @@ int main(int argc, char** argv)
         if(line.find(">")!=string::npos){
             fork_ex_out(command,line,ERRNO);
         }
+        if(line.find("<")!=string::npos){
+            fork_exIn(command,line,ERRNO);
+        }
         if (!command.compare("merrno"))
         {
             merrno(command, line, ERRNO);
@@ -670,7 +766,7 @@ int main(int argc, char** argv)
                 break;
             }
         }
-        else if(line.find(">")==string::npos)
+        else if(line.find(">")==string::npos && line.find("<")==string::npos)
         {
             if(line.find('=') != line.find('`'))
             {

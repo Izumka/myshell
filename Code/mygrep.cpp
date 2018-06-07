@@ -28,16 +28,12 @@ int check_line(string& line, string& pattern, bool ignore_case, bool invert_matc
     if (!invert_match) {
         if (!regexp_specified){
             if (line.find(pattern) != string::npos){
-                if (!file)
-                    cout << "found: ";
                 cout << line << endl;
                 return 1;
             }
         } else {
           regex e (pattern);
           if (regex_search(line, e)){
-              if (!file)
-                  cout << "found: ";
               cout << line << endl;
               return 1;
           }
@@ -45,16 +41,12 @@ int check_line(string& line, string& pattern, bool ignore_case, bool invert_matc
     } else {
         if (!regexp_specified){
             if (line.find(pattern) == string::npos){
-                if (!file)
-                    cout << "found: ";
                 cout << line << endl;
                 return 1;
             }
         } else {
             regex e (pattern);
             if (!regex_search(line, e)){
-                if (!file)
-                    cout << "found: ";
                 cout << line << endl;
                 return 1;
             }
