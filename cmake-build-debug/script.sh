@@ -1,5 +1,1 @@
-#!/home/user/myshell/myshell
-# Absolute path is necessary in shebang.
-# My simple script
-echo "Files:"
-myls 
+- l
